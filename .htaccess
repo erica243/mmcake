@@ -1,0 +1,45 @@
+# HTID:23422420: DO NOT REMOVE OR MODIFY THIS LINE AND THE LINES BELOW
+php_value display_errors 1
+# DO NOT REMOVE OR MODIFY THIS LINE AND THE LINES ABOVE HTID:23422420:
+
+# Enable URL rewriting
+RewriteEngine On
+
+# Block redirection to any external domain except mandm-lawis.com
+RewriteCond %{HTTP_HOST} !^mandm-lawis\.com$ [NC]
+RewriteRule ^ - [F,L]
+
+# Prevent access to .htaccess file itself for security
+<Files .htaccess>
+  Order allow,deny
+  Deny from all
+  Satisfy all
+</Files>
+
+# Prevent hotlinking (cross-site request)
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^https?://(www\.)?mandm-lawis\.com/ [NC]
+RewriteRule \.(jpg|jpeg|png|gif|css|js)$ - [F,L]
+
+# XSS and clickjacking prevention
+<IfModule mod_headers.c>
+  # Prevent embedding the site in an iframe to avoid clickjacking
+  Header always append X-Frame-Options SAMEORIGIN
+
+  # Enable XSS protection in browsers
+  Header set X-XSS-Protection "1; mode=block"
+
+  # Disable content sniffing to prevent MIME-type confusion attacks
+  Header set X-Content-Type-Options nosniff
+</IfModule>
+# Add to .htaccess
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Prevent direct access to PHP files
+<FilesMatch "^(?!index\.php$).*\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
